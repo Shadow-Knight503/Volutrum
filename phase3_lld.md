@@ -1,203 +1,298 @@
-**Low-Level Design (LLD) Document: Automated, Anonymous Midpoint Negotiation Module for ODR**
+## Introduction to the Automated Midpoint Negotiation Module
+The automated midpoint negotiation module is designed to facilitate efficient and anonymous dispute resolution (ODR) by providing a neutral midpoint for negotiations. This module aims to assist parties in reaching a mutually acceptable agreement without requiring direct communication.
 
-### 1. System Architecture Description
+## System Architecture
+The system will be built using the following components:
+* **API Gateway**: Handles incoming requests and routes them to the appropriate microservice.
+* **Negotiation Service**: Responsible for calculating midpoints, handling iterative negotiations, and providing concession analysis.
+* **Data Storage**: Stores negotiation data, party information, and system configuration.
+* **Logging Service**: Handles logging of process status tokens and internal mapped IDs.
 
-The proposed system is a microservices-based architecture, designed to provide a scalable, secure, and anonymous midpoint negotiation module for Online Dispute Resolution (ODR) platforms. The system consists of the following layers:
+### API Gateway
+The API Gateway will be built using Next.js and will handle incoming requests from parties. It will route requests to the Negotiation Service and handle authentication and authorization.
 
-* **Presentation Layer**: A user-friendly interface built using modern web technologies (e.g., React, Angular) that allows parties to input their negotiation parameters without revealing their identities.
-* **Application Layer**: A set of microservices responsible for implementing the midpoint negotiation algorithm, secure communication channel, and reporting/analytics functionality. These microservices will be built using Python 3.9 and the Flask framework.
-* **Data Layer**: A database management system (e.g., PostgreSQL 13) that stores the negotiation parameters, midpoint calculations, and reporting/analytics data. The database will be designed to ensure complete data isolation and deterministic logging.
-* **Infrastructure Layer**: A cloud-based infrastructure (e.g., AWS) that provides the necessary computing resources, storage, and security features to support the system.
+### Negotiation Service
+The Negotiation Service will be built using FastAPI and will handle the core functionality of the system, including:
+* **Midpoint Calculation**: Calculates the midpoint between parties' initial offers.
+* **Iterative Negotiation**: Handles iterative negotiations and calculates new midpoints based on party inputs.
+* **Concession Analysis**: Provides insights into party concession history.
 
-### 2. Component Breakdown
+### Data Storage
+The Data Storage layer will be built using PostgreSQL and pgvector. It will store:
+* **Negotiation Data**: Stores negotiation history, party information, and system configuration.
+* **Party Information**: Stores party details, including anonymous identifiers.
 
-The system consists of the following components:
+### Logging Service
+The Logging Service will handle logging of process status tokens and internal mapped IDs. It will use a deterministic logging approach to ensure that logs are consistent and reliable.
 
-* **Anonymous User Interface (AUI)**: A web-based interface built using React 17, allowing parties to input their negotiation parameters without revealing their identities.
-* **Midpoint Negotiation Service (MNS)**: A microservice responsible for calculating the midpoint between the parties' initial offers, taking into account the negotiation parameters and constraints. The MNS will be built using Python 3.9 and the scikit-learn library.
-* **Secure Communication Service (SCS)**: A microservice that provides a secure and encrypted communication channel for the negotiation process. The SCS will be built using Python 3.9 and the cryptography library.
-* **Reporting and Analytics Service (RAS)**: A microservice that generates basic reports and analytics to track the negotiation process and provide insights into the effectiveness of the module. The RAS will be built using Python 3.9 and the pandas library.
-* **Data Isolation and Logging Service (DILS)**: A microservice responsible for ensuring complete data isolation and deterministic logging, excluding any raw transactional/customer text. The DILS will be built using Python 3.9 and the logging library.
-* **Tokenization Service (TS)**: A microservice that generates and manages tokens for secure communication and data encryption. The TS will be built using Python 3.9 and the cryptography library.
+## Database Migration Fields
+The database migration fields will include:
+* **Negotiation ID**: Unique identifier for each negotiation.
+* **Party 1 Offer**: Initial offer from party 1.
+* **Party 2 Offer**: Initial offer from party 2.
+* **Midpoint**: Calculated midpoint between party 1 and party 2 offers.
+* **Concession History**: Stores concession history for each party.
+* **Process Status**: Stores process status tokens and internal mapped IDs.
 
-### 3. Data Flow & Tokenization Sequence
-
-The data flow and tokenization sequence are as follows:
-
-1. **Party Input**: Parties input their negotiation parameters through the AUI.
-2. **Token Generation**: The TS generates a unique token for each party, which is used for secure communication and data encryption.
-3. **Token Exchange**: The parties exchange their tokens through the SCS, ensuring secure and encrypted communication.
-4. **Midpoint Calculation**: The MNS calculates the midpoint between the parties' initial offers, using the negotiation parameters and constraints.
-5. **Midpoint Notification**: The MNS notifies the parties of the calculated midpoint through the SCS.
-6. **Reporting and Analytics**: The RAS generates reports and analytics on the negotiation process, using data from the MNS and SCS.
-7. **Logging**: The DILS logs process statuses and internal mapped IDs, excluding any raw transactional/customer text.
-
-### 4. Security, Privacy & Compliance Architecture
-
-The system is designed to ensure the highest level of security, privacy, and compliance, with the following features:
-
-* **Data Encryption**: All data is encrypted using industry-standard encryption algorithms (e.g., AES, RSA).
-* **Secure Communication**: The SCS provides a secure and encrypted communication channel for the negotiation process.
-* **Access Control**: Role-based access control is implemented to ensure that only authorized personnel can access the system and its components.
-* **Data Isolation**: Complete data isolation is ensured through the use of separate databases and storage systems for each party's data.
-* **Deterministic Logging**: The DILS ensures that only process statuses and internal mapped IDs are logged, excluding any raw transactional/customer text.
-* **Compliance**: The system is designed to comply with relevant regulations and standards, such as GDPR, HIPAA, and PCI-DSS.
-
-### 5. Technical Controls
-
-The system incorporates the following technical controls:
-
-* **INPUT FILTERING & PII DETECTION SCHEMAS**: Regex validation blocks are used to filter and detect personally identifiable information (PII) in user input.
-* **AIBOM (AI BILL OF MATERIALS) STRUCTURAL SPEC**: A detailed JSON schema configuration layout is used to define the structure and dependencies of the AI models used in the system.
-* **DATABASE SCHEMAS & METHOD SIGNATURES**: SQL schemas and API endpoints are defined to ensure data consistency and integrity. Python type-hinted code blocks are used to ensure method signatures are correctly defined.
-* **GUARDRAIL UNIT TESTING HOOKS**: Test-case logic is implemented to catch prompt injections and ensure the system's security and integrity.
-
-### 6. Database Schemas
-
-The database schemas are defined as follows:
-
-* **Negotiation Parameters Table**:
 ```sql
-CREATE TABLE negotiation_parameters (
-    id SERIAL PRIMARY KEY,
-    party_id INTEGER NOT NULL,
-    negotiation_parameter VARCHAR(255) NOT NULL,
-    value VARCHAR(255) NOT NULL
+CREATE TABLE negotiation_data (
+  negotiation_id SERIAL PRIMARY KEY,
+  party1_offer DECIMAL(10, 2),
+  party2_offer DECIMAL(10, 2),
+  midpoint DECIMAL(10, 2),
+  concession_history TEXT,
+  process_status TEXT
 );
-```
-* **Midpoint Calculations Table**:
-```sql
-CREATE TABLE midpoint_calculations (
-    id SERIAL PRIMARY KEY,
-    negotiation_id INTEGER NOT NULL,
-    midpoint_value VARCHAR(255) NOT NULL,
-    calculation_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-```
-* **Reporting and Analytics Table**:
-```sql
-CREATE TABLE reporting_and_analytics (
-    id SERIAL PRIMARY KEY,
-    negotiation_id INTEGER NOT NULL,
-    report_type VARCHAR(255) NOT NULL,
-    report_data VARCHAR(255) NOT NULL,
-    report_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+CREATE TABLE party_information (
+  party_id SERIAL PRIMARY KEY,
+  anonymous_identifier TEXT
 );
 ```
 
-### 7. Method Signatures
+## Input Validation Parameters
+The input validation parameters will include:
+* **Party 1 Offer**: Must be a valid decimal number between 0 and 100.
+* **Party 2 Offer**: Must be a valid decimal number between 0 and 100.
+* **Concession History**: Must be a valid JSON object.
 
-The method signatures are defined as follows:
-
-* **Midpoint Negotiation Service**:
 ```python
-from typing import Dict, List
+from pydantic import BaseModel, validator
 
-def calculate_midpoint(negotiation_parameters: Dict[str, str]) -> str:
-    # Calculate midpoint logic here
-    pass
+class NegotiationRequest(BaseModel):
+  party1_offer: float
+  party2_offer: float
+  concession_history: dict
 
-def notify_parties(midpoint_value: str) -> None:
-    # Notify parties logic here
-    pass
-```
-* **Secure Communication Service**:
-```python
-from typing import Dict, List
+  @validator('party1_offer')
+  def validate_party1_offer(cls, v):
+    if not 0 <= v <= 100:
+      raise ValueError('Party 1 offer must be between 0 and 100')
+    return v
 
-def generate_token(party_id: int) -> str:
-    # Generate token logic here
-    pass
+  @validator('party2_offer')
+  def validate_party2_offer(cls, v):
+    if not 0 <= v <= 100:
+      raise ValueError('Party 2 offer must be between 0 and 100')
+    return v
 
-def exchange_tokens(token1: str, token2: str) -> None:
-    # Exchange tokens logic here
-    pass
-```
-* **Reporting and Analytics Service**:
-```python
-from typing import Dict, List
-
-def generate_report(negotiation_id: int) -> str:
-    # Generate report logic here
-    pass
-
-def generate_analytics(negotiation_id: int) -> str:
-    # Generate analytics logic here
-    pass
+  @validator('concession_history')
+  def validate_concession_history(cls, v):
+    if not isinstance(v, dict):
+      raise ValueError('Concession history must be a valid JSON object')
+    return v
 ```
 
-### 8. Guardrail Unit Testing Hooks
+## API Endpoints
+The API endpoints will include:
+* **POST /negotiate**: Calculates the midpoint between party 1 and party 2 offers.
+* **GET /negotiation-history**: Retrieves the negotiation history for a given negotiation ID.
+* **POST /concession**: Updates the concession history for a given negotiation ID.
 
-The guardrail unit testing hooks are defined as follows:
-
-* **Test Case 1: Prompt Injection**:
 ```python
-import unittest
-from unittest.mock import Mock
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
-class TestPromptInjection(unittest.TestCase):
-    def test_prompt_injection(self):
-        # Mock user input
-        user_input = Mock(return_value=" malicious input ")
+app = FastAPI()
 
-        # Test prompt injection logic here
-        pass
+class NegotiationRequest(BaseModel):
+  party1_offer: float
+  party2_offer: float
+
+@app.post("/negotiate")
+async def negotiate(negotiation_request: NegotiationRequest):
+  # Calculate midpoint
+  midpoint = (negotiation_request.party1_offer + negotiation_request.party2_offer) / 2
+  return {"midpoint": midpoint}
+
+@app.get("/negotiation-history")
+async def get_negotiation_history(negotiation_id: int):
+  # Retrieve negotiation history from database
+  negotiation_history = retrieve_negotiation_history(negotiation_id)
+  return {"negotiation_history": negotiation_history}
+
+@app.post("/concession")
+async def update_concession(negotiation_id: int, concession_history: dict):
+  # Update concession history in database
+  update_concession_history(negotiation_id, concession_history)
+  return {"message": "Concession history updated successfully"}
 ```
-* **Test Case 2: Data Encryption**:
-```python
-import unittest
-from unittest.mock import Mock
 
-class TestDataEncryption(unittest.TestCase):
-    def test_data_encryption(self):
-        # Mock data to be encrypted
-        data = Mock(return_value=" sensitive data ")
+## Request/Response Schemas
+The request/response schemas will include:
+* **Negotiation Request**: Includes party 1 and party 2 offers.
+* **Negotiation Response**: Includes the calculated midpoint.
+* **Concession Request**: Includes the concession history.
+* **Concession Response**: Includes a success message.
 
-        # Test data encryption logic here
-        pass
-```
-
-### 9. AIBOM Structural Spec
-
-The AIBOM structural spec is defined as follows:
 ```json
 {
-    "name": "Midpoint Negotiation Model",
-    "version": "1.0",
-    "dependencies": [
-        {
-            "name": "scikit-learn",
-            "version": "1.0"
-        }
-    ],
-    "models": [
-        {
-            "name": "Midpoint Calculation Model",
-            "type": "linear regression",
-            "parameters": {
-                "learning_rate": 0.01,
-                "max_iter": 1000
-            }
-        }
-    ]
+  "party1_offer": 50.0,
+  "party2_offer": 60.0
+}
+
+{
+  "midpoint": 55.0
+}
+
+{
+  "concession_history": {
+    "party1": [50.0, 55.0],
+    "party2": [60.0, 55.0]
+  }
+}
+
+{
+  "message": "Concession history updated successfully"
 }
 ```
 
-### 10. Input Filtering & PII Detection Schemas
+## Regex Data Sanitization Layers
+The regex data sanitization layers will include:
+* **Party 1 Offer**: Must match the pattern `^\d{1,3}(\.\d{1,2})?$`.
+* **Party 2 Offer**: Must match the pattern `^\d{1,3}(\.\d{1,2})?$`.
+* **Concession History**: Must match the pattern `^{.*}$`.
 
-The input filtering & PII detection schemas are defined as follows:
 ```python
 import re
 
-def filter_input(user_input: str) -> str:
-    # Filter input logic here
-    filtered_input = re.sub(r"\W+", "", user_input)
-    return filtered_input
+def validate_party1_offer(party1_offer):
+  pattern = r'^\d{1,3}(\.\d{1,2})?$'
+  if not re.match(pattern, str(party1_offer)):
+    raise ValueError('Party 1 offer must be a valid decimal number')
 
-def detect_pii(user_input: str) -> bool:
-    # Detect PII logic here
-    pii_pattern = r"\d{3}-\d{2}-\d{4}"
-    if re.search(pii_pattern, user_input):
-        return True
-    return False
+def validate_party2_offer(party2_offer):
+  pattern = r'^\d{1,3}(\.\d{1,2})?$'
+  if not re.match(pattern, str(party2_offer)):
+    raise ValueError('Party 2 offer must be a valid decimal number')
+
+def validate_concession_history(concession_history):
+  pattern = r'^{.*}$'
+  if not re.match(pattern, str(concession_history)):
+    raise ValueError('Concession history must be a valid JSON object')
+```
+
+## PyTest Test Definitions
+The PyTest test definitions will include:
+* **Test Negotiation**: Tests the negotiation endpoint.
+* **Test Concession**: Tests the concession endpoint.
+* **Test Negotiation History**: Tests the negotiation history endpoint.
+
+```python
+import pytest
+from fastapi.testclient import TestClient
+from main import app
+
+client = TestClient(app)
+
+def test_negotiation():
+  response = client.post("/negotiate", json={"party1_offer": 50.0, "party2_offer": 60.0})
+  assert response.status_code == 200
+  assert response.json()["midpoint"] == 55.0
+
+def test_concession():
+  response = client.post("/concession", json={"concession_history": {"party1": [50.0, 55.0], "party2": [60.0, 55.0]}})
+  assert response.status_code == 200
+  assert response.json()["message"] == "Concession history updated successfully"
+
+def test_negotiation_history():
+  response = client.get("/negotiation-history", params={"negotiation_id": 1})
+  assert response.status_code == 200
+  assert response.json()["negotiation_history"] == {"party1": [50.0, 55.0], "party2": [60.0, 55.0]}
+```
+
+## AIBOM Configuration
+The AIBOM configuration will include:
+* **Negotiation Module**: Includes the negotiation endpoint.
+* **Concession Module**: Includes the concession endpoint.
+* **Negotiation History Module**: Includes the negotiation history endpoint.
+
+```json
+{
+  "negotiation_module": {
+    "endpoint": "/negotiate",
+    "method": "POST",
+    "request_schema": {
+      "party1_offer": "float",
+      "party2_offer": "float"
+    },
+    "response_schema": {
+      "midpoint": "float"
+    }
+  },
+  "concession_module": {
+    "endpoint": "/concession",
+    "method": "POST",
+    "request_schema": {
+      "concession_history": "dict"
+    },
+    "response_schema": {
+      "message": "str"
+    }
+  },
+  "negotiation_history_module": {
+    "endpoint": "/negotiation-history",
+    "method": "GET",
+    "request_schema": {
+      "negotiation_id": "int"
+    },
+    "response_schema": {
+      "negotiation_history": "dict"
+    }
+  }
+}
+```
+
+## Structural Verification AIBOM Configuration
+The structural verification AIBOM configuration will include:
+* **Negotiation Module**: Includes the negotiation endpoint.
+* **Concession Module**: Includes the concession endpoint.
+* **Negotiation History Module**: Includes the negotiation history endpoint.
+
+```json
+{
+  "negotiation_module": {
+    "endpoint": "/negotiate",
+    "method": "POST",
+    "request_schema": {
+      "party1_offer": "float",
+      "party2_offer": "float"
+    },
+    "response_schema": {
+      "midpoint": "float"
+    },
+    "verification_schema": {
+      "party1_offer": "float",
+      "party2_offer": "float",
+      "midpoint": "float"
+    }
+  },
+  "concession_module": {
+    "endpoint": "/concession",
+    "method": "POST",
+    "request_schema": {
+      "concession_history": "dict"
+    },
+    "response_schema": {
+      "message": "str"
+    },
+    "verification_schema": {
+      "concession_history": "dict"
+    }
+  },
+  "negotiation_history_module": {
+    "endpoint": "/negotiation-history",
+    "method": "GET",
+    "request_schema": {
+      "negotiation_id": "int"
+    },
+    "response_schema": {
+      "negotiation_history": "dict"
+    },
+    "verification_schema": {
+      "negotiation_id": "int",
+      "negotiation_history": "dict"
+    }
+  }
+}
 ```

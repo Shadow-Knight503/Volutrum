@@ -1,0 +1,5 @@
+{
+    "frameworks": ["DPDP Act 2023", "NIST AI RMF"],
+    "logging_policy": "CRITICAL: Do not log raw transactional text, user messages, or sensitive financial/personal data. Log process status tokens and Internal Mapped IDs only.",
+    "pii_redaction": "All customer names, emails, and identifiers must be stripped or matched to anonymous internal vault tokens at the ingress gateway."
+}

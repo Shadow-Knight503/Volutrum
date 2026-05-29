@@ -1,0 +1,5 @@
+{
+    "documentation_format": "Markdown (.md) with strict semantic headings (##, ###). Use code blocks with type-hinting for programming specs.",
+    "preferred_stack": "FastAPI (Python Backend), Next.js (TypeScript Frontend), PostgreSQL + pgvector (Database Layer)",
+    "verification_metrics": "Every low-level technical design must output an explicit structural blueprint template for an AI Bill of Materials (AIBOM) tracking schema."
+}
