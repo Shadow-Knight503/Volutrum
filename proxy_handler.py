@@ -4,11 +4,6 @@ from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 from presidio_anonymizer.entities import OperatorConfig
 
-'''
-$env:GROQ_API_KEY = "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"
-An automated, anonymous midpoint negotiation module for ODR.
-'''
-
 class ODRProxyHandler(CustomLogger):
     def __init__(self):
         self.analyzer = AnalyzerEngine()
