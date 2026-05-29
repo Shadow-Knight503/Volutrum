@@ -4,6 +4,7 @@ from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 from presidio_anonymizer.entities import OperatorConfig
 
+
 class ODRProxyHandler(CustomLogger):
     def __init__(self):
         self.analyzer = AnalyzerEngine()
